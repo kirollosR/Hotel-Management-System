@@ -1,5 +1,7 @@
 package Hotel.Models
 
+import slick.jdbc.GetResult
+
 case class RoomClass(
   id: Int,
   capacity: Int,
@@ -15,5 +17,8 @@ object Room {
     // mapping function to transform from tuple to domain object and vice versa
     override def * = (id, capacity, price) <> (RoomClass.tupled, RoomClass.unapply)
   }
+  lazy val RoomTable = TableQuery[RoomTable]
+
+  implicit val getRoomResult = GetResult(r => RoomClass(r.nextInt, r.nextInt, r.nextDouble))
 
 }

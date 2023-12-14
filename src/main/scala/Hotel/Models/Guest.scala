@@ -23,4 +23,6 @@ object Guest {
   }
   lazy val GuestTable = TableQuery[GuestTable]
 
+  implicit val getGuestResult = GetResult(r => GuestClass(r.nextInt, r.nextString, r.nextBoolean, r.nextString, r.nextString))
+
 }

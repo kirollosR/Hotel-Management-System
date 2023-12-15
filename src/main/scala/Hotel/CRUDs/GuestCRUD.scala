@@ -22,7 +22,8 @@ object GuestDao {
 
 // ------------------ SimpleCRUD ------------------
   def addGuest(guest: GuestClass): Future[Int] = {
-    db.run(GuestTable returning  GuestTable.map(_.id) += guest)
+    val result: Future[Option[Int]] = db.run(GuestTable returning  GuestTable.map(_.id) += guest)
+    result.map(_.get)
   }
 
   def getGuestById(guestId: Int): Future[Option[GuestClass]] =
@@ -96,4 +97,4 @@ object GuestDao {
 //            println(s"Error deleting guest: ${ex.getMessage}")
 //            throw ex
 //        }
-//}
+}

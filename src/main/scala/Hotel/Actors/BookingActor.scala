@@ -9,14 +9,14 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.Duration
 import slick.jdbc.MySQLProfile.api._
 
-object BookingManagerActor{
+object BookingActor{
 
 }
 
 
-class BookingManagerActor extends Actor {
+class BookingActor extends Actor {
   // Fetch rooms from the database and create RoomActors for each
-  val roomActors: Map[Int, ActorRef] = {
+  def getAllRoomActors: Map[Int, ActorRef] = {
     val roomsFuture: Future[Seq[RoomClass]] = db.run(RoomTable.result)
 
     val roomActorsFuture: Future[Map[Int, ActorRef]] = roomsFuture.map { rooms =>
@@ -31,7 +31,7 @@ class BookingManagerActor extends Actor {
   def receive: Receive = {
     case request: BookingClass =>
       // Forward the booking request to the corresponding RoomActor
-      roomActors.get(request.roomId).foreach(_ forward request)
+      getAllRoomActors.get(request.roomId).foreach(_ forward request)
   }
 }
 

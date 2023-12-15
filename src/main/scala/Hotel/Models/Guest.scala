@@ -2,7 +2,7 @@ package Hotel.Models
 import slick.jdbc.GetResult
 
 case class GuestClass(
-  id: Int,
+  id: Option[Int],
   name: String,
   status: Boolean,
   email: String,
@@ -12,7 +12,7 @@ object Guest {
   import slick.jdbc.MySQLProfile.api._
 
   class GuestTable(tag: Tag) extends Table[GuestClass](tag, "guest") {
-    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+    def id = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
     def status = column[Boolean]("status")
     def email = column[String]("email")
@@ -23,6 +23,6 @@ object Guest {
   }
   lazy val GuestTable = TableQuery[GuestTable]
 
-  implicit val getGuestResult = GetResult(r => GuestClass(r.nextInt, r.nextString, r.nextBoolean, r.nextString, r.nextString))
+  implicit val getGuestResult = GetResult(r => GuestClass(r.nextIntOption(), r.nextString, r.nextBoolean, r.nextString, r.nextString))
 
 }

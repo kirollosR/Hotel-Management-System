@@ -18,10 +18,10 @@ object Main extends App {
   val actorSystem = ActorSystem("Hotel-Managment-System")
   val user = actorSystem.actorOf(Props[User], "User")
 
-  val newGuest = GuestClass(100, "sayed", status = false, "sayed", "06541859")
+  val newGuest = GuestClass(None, "sayed", status = false, "sayed", "06541859")
 
-//// ----ADD GUEST----
-//  val addGuestResult = Await.result(addGuest(newGuest), 2.seconds)
-//  println(s"Creating user Result: $addGuestResult")
+// ----ADD GUEST----
+  val addGuestResult = Await.result(addGuest(newGuest), 2.seconds)
+  println(s"Creating user Result: $addGuestResult")
 
 }

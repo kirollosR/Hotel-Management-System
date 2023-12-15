@@ -5,11 +5,11 @@ import slick.jdbc.GetResult
 import java.time.LocalDate
 
 case class BookingClass(
-                         id: Int,
-                         guestId: Int,
-                         roomId: Int,
-                         reservationStartDate: LocalDate,
-                         reservationEndDate: LocalDate,
+       id: Int,
+       guestId: Int,
+       roomId: Int,
+       reservationStartDate: LocalDate,
+       reservationEndDate: LocalDate,
 )
 object Booking {
   import slick.jdbc.MySQLProfile.api._

@@ -1,8 +1,7 @@
 package Hotel
 
 import Hotel.Actors.User
-import akka.actor.{Actor, ActorSystem, Props}
-import akka.actor.typed.ActorSystem
+import akka.actor.{ActorSystem, Props}
 
 object Main extends App {
 

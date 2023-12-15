@@ -14,7 +14,7 @@ class Bill {
   object Bill {
     import slick.jdbc.MySQLProfile.api._
 
-    class BillTable(tag: Tag) extends Table[Bill](tag, "bill") {
+    class BillTable(tag: Tag) extends Table[BillClass](tag, "bill") {
       def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
       def bookingId = column[Int]("booking_id")
       def amount = column[Double]("amount")

@@ -41,6 +41,15 @@ object GuestCRUD {
     db.run(query)
   }
 
+  def findAllGuestsMails : Future[Seq[String]] = {
+    val query = GuestTable.map(_.email).result
+    db.run(query)
+  }
+
+  def findAllGuestsPhones : Future[Seq[String]] = {
+    val query = GuestTable.map(_.phone).result
+    db.run(query)
+  }
 
 //// ------------------ CRUD WITH ERROR HANDLING ------------------
 //

@@ -1,6 +1,7 @@
 package Hotel.Actors
 import Hotel.Actors.BookingActor.Book
-import Hotel.CRUDs.CurrentlyReservedCRUD.{findAvailableRoom, isRoomReserved}
+import Hotel.Actors.CurrenltReservedActor.makeReservation
+import Hotel.CRUDs.CurrentlyReservedCRUD.{addReservation, findAvailableRoom, isRoomReserved}
 import Hotel.CRUDs.RoomCRUD
 import Hotel.PrivateExecutor._
 import Hotel.Models.Room.RoomTable
@@ -20,6 +21,7 @@ import scala.util.{Failure, Success}
 
 object BookingActor{
   case class Book(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate, guestId: Int)
+  case class makeReservation(currentlyReserved: CurrentlyReservedClass)
 
 }
 
@@ -41,6 +43,18 @@ class BookingActor extends Actor {
   }
 
   def receive: Receive = {
+    case makeReservation(currentlyReserved) => {
+      println("makeReservation")
+      val resultFuture = addReservation(currentlyReserved)
+
+      val result = try {
+        Await.result(resultFuture, 2.seconds) // Adjust the timeout duration as needed
+      } catch {
+        case e: Throwable =>
+          println(s"Error waiting for result: $e")
+      }
+
+    }
     case Book(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate, guestId: Int) => {
       val rooms = getAllRoomsByCapacity(roomCapacity)
       val result: Int = Await.result(Future(roomAvailable(roomCapacity, startDate, endDate)), Duration.Inf)
@@ -49,7 +63,7 @@ class BookingActor extends Actor {
         println(s"Room $result is available")
         val currentlyReservedClass = CurrentlyReservedClass(None, result, startDate, endDate, guestId)
 
-        val futureResponse = (currenltlyReservedActor ? CurrenltReservedActor.makeReservation(currentlyReservedClass)).mapTo[String]
+        val futureResponse = (bookingActor ? BookingActor.makeReservation(currentlyReservedClass)).mapTo[String]
         val response = Await.result(futureResponse, timeout.duration)
         println(response)
 //        val roomActor = context.actorOf(Props[RoomActor], s"room$result")

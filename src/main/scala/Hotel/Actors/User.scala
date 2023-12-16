@@ -4,6 +4,7 @@ import Hotel.Actors.BookingActor._
 import Hotel.Actors.User.LiveTheLife
 import akka.actor.Actor
 import Hotel.Main._
+import Hotel.Models.CurrentlyReservedClass
 import akka.util.Timeout
 
 import java.time.LocalDate

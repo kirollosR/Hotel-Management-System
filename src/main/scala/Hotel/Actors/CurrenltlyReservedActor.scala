@@ -45,18 +45,18 @@ class CurrenltReservedActor extends Actor {
   // --------- AWAIT ----------
 
   override def receive: Receive = {
-    case makeReservation(currentlyReserved) => {
-      println("makeReservation")
-      val resultFuture = addReservation(currentlyReserved)
-
-      val result = try {
-        Await.result(resultFuture, 2.seconds) // Adjust the timeout duration as needed
-      } catch {
-        case e: Throwable =>
-          println(s"Error waiting for result: $e")
-      }
-
-    }
+//    case makeReservation(currentlyReserved) => {
+//      println("makeReservation")
+//      val resultFuture = addReservation(currentlyReserved)
+//
+//      val result = try {
+//        Await.result(resultFuture, 2.seconds) // Adjust the timeout duration as needed
+//      } catch {
+//        case e: Throwable =>
+//          println(s"Error waiting for result: $e")
+//      }
+//
+//    }
     case isReserved(roomId, startDate, endDate) =>
       val resultFuture = isRoomReserved(roomId, startDate, endDate)
 

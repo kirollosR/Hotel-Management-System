@@ -50,6 +50,7 @@ object Main extends App {
   user ! User.LiveTheLife
 
 
+
 //  val newGuest = GuestClass(None, "sayed", status = false, "sayed", "06541859")
 //
 //// ----ADD GUEST----

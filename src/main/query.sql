@@ -33,8 +33,7 @@ CREATE TABLE Bill (
 CREATE TABLE currently_reserved (
                                     ID INT PRIMARY KEY AUTO_INCREMENT,
                                     room_ID INT NOT NULL,
-                                    reservation_start_date DATETIME NOT NULL,
-                                    reservation_end_date DATETIME NOT NULL,
+                                    reservation_start_date DATE NOT NULL,
+                                    reservation_end_date DATE NOT NULL,
                                     FOREIGN KEY (room_ID) REFERENCES Room(ID)
-
 );

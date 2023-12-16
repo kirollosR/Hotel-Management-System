@@ -1,7 +1,7 @@
 package Hotel.CRUDs
 import Hotel.Models.Guest.GuestTable
 import Hotel.Models.{Guest, GuestClass}
-import Hotel.connection
+import Hotel.PrivateExecutor._
 import Hotel.connection.db
 
 import java.time.LocalDate
@@ -9,16 +9,11 @@ import java.util.concurrent.Executors
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-object PrivateExecutor {
-  val executor = Executors.newFixedThreadPool(4)
-  implicit val ec: ExecutionContext = ExecutionContext.fromExecutorService(executor)
-}
 
 
-object GuestDao {
+object GuestCRUD {
 
   import slick.jdbc.MySQLProfile.api._
-  import PrivateExecutor._
 
 // ------------------ SimpleCRUD ------------------
   def addGuest(guest: GuestClass): Future[Int] = {

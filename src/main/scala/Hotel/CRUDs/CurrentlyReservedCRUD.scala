@@ -48,6 +48,16 @@ object CurrentlyReservedCRUD {
     }
   }
 
+  def AllCurrentlyReserved: Future[Seq[CurrentlyReservedClass]] = {
+    val result: Future[Seq[CurrentlyReservedClass]] = db.run(CurrentlyReservedTable.result)
+    result
+  }
+
+  def cancelReservation(reservationId: Int): Future[Int] = {
+    val result: Future[Int] = db.run(CurrentlyReservedTable.filter(_.id === reservationId).delete)
+    result
+  }
+
 
 
 }

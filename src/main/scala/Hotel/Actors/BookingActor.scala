@@ -1,8 +1,9 @@
 package Hotel.Actors
-import Hotel.Actors.BookingActor.Book
+import Hotel.Actors.BookingActor.{Book, Cancel}
 import Hotel.Actors.CurrenltReservedActor.makeReservation
-import Hotel.CRUDs.CurrentlyReservedCRUD.{addReservation, findAvailableRoom, isRoomReserved}
-import Hotel.CRUDs.RoomCRUD
+import Hotel.CRUDs.BookingCRUD.addBooking
+import Hotel.CRUDs.CurrentlyReservedCRUD.{addReservation, cancelReservation, findAvailableRoom, isRoomReserved}
+import Hotel.CRUDs.{CurrentlyReservedCRUD, RoomCRUD}
 import Hotel.PrivateExecutor._
 import Hotel.Models.Room.RoomTable
 import Hotel.Models.{BookingClass, CurrentlyReservedClass, RoomClass}
@@ -21,7 +22,7 @@ import scala.util.{Failure, Success}
 
 object BookingActor{
   case class Book(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate, guestId: Int)
-
+  case class Cancel(reservationId: Int)
 }
 
 
@@ -43,70 +44,40 @@ class BookingActor extends Actor {
 
   def receive: Receive = {
     case Book(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate, guestId: Int) => {
-      val rooms = getAllRoomsByCapacity(roomCapacity)
-      val result: Int = Await.result(Future(roomAvailable(roomCapacity, startDate, endDate)), Duration.Inf)
-      println(result)
-      if (result != -1) {
-        println(s"Room $result is available")
-        val currentlyReservedClass = CurrentlyReservedClass(None, result, startDate, endDate, guestId)
+      bookingHandeling(roomCapacity, startDate, endDate, guestId)
+    }
 
-        val futureResponse = Await.result(Future(makeReservation(currentlyReservedClass)), timeout.duration)
-//        val response = Await.result(futureResponse, timeout.duration)
-        println(futureResponse)
-//        val roomActor = context.actorOf(Props[RoomActor], s"room$result")
-//        roomActor ! RoomActor.Book(startDate, endDate)
-      } else {
-        println("No Rooms available at this period of time")
-      }
-//      (currenltReservedActor ? CurrenltReservedActor.findAvailableRoom(rooms, startDate, endDate))
-//        .mapTo[Either[Boolean, Int]]
-//        .onComplete {
-//          case Success(result) =>
-//            result match {
-//              case Left(true) => println("No Rooms available at this period of time")
-//              case Right(roomId) => println(s"Room $roomId is available")
-//              case _ => println("Unexpected result")
-//            }
-//
-//          case Failure(exception) => println(s"Error: ${exception.getMessage}")
-//        }
-
-
-      //      }
-
-
-
+    case Cancel(reservationId: Int) => {
+      cancleReservation(reservationId)
     }
   }
 
-//  private def roomAvailable(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate): Any = {
-//    val rooms = getAllRoomsByCapacity(roomCapacity)
-//    println(rooms)
-//
-//    // Loop through the RoomClass instances
-//    rooms.foreach { room =>
-//      // Access the id and do something with it
-//
-//      val futurResponse = (currenltReservedActor ? CurrenltReservedActor.isReserved(room.id, startDate, endDate)).mapTo[Boolean]
-//      val isReserved = Await.result(futurResponse, timeout.duration)
-//      println(isReserved)
-//      if (!isReserved) {
-////        sender() ! room.id
-//        println(s"Room ${room.id} is available")
-//      } else {
-//        println("No Rooms available at this period of time")
-//      }
-//    }
-//  }
+
+
+//----------------------------------------------BOOKING-LOGIC----------------------------------------------
+  private def bookingHandeling(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate, guestId: Int) = {
+    val rooms = getAllRoomsByCapacity(roomCapacity)
+    val result: Int = Await.result(Future(roomAvailable(roomCapacity, startDate, endDate)), Duration.Inf)
+//    println(result)
+    if (result != -1) {
+//      println(s"Room $result is available")
+      val currentlyReservedClass = CurrentlyReservedClass(None, result, startDate, endDate, guestId)
+
+      val futureResponse = Await.result(Future(makeReservation(currentlyReservedClass)), timeout.duration)
+      //        val response = Await.result(futureResponse, timeout.duration)
+      println(s"Reservation ID: $futureResponse")
+      //        val roomActor = context.actorOf(Props[RoomActor], s"room$result")
+      //        roomActor ! RoomActor.Book(startDate, endDate)
+    } else {
+      println("No Rooms available at this period of time")
+    }
+  }
 
   private def roomAvailable(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate): Int = {
     val rooms = getAllRoomsByCapacity(roomCapacity)
-    println(rooms)
-//    val futurResponse = (currenltReservedActor ? CurrenltReservedActor.findAvailableRoom(rooms, startDate, endDate)).mapTo[Any]
-//    val isReserved = Await.result(futurResponse, timeout.duration)
-    val resultFuture: Future[Either[Boolean, Int]] = findAvailableRoom(rooms, startDate, endDate)
+    val reservationResult: Future[Either[Boolean, Int]] = findAvailableRoom(rooms, startDate, endDate)
 
-    val result: Int = Await.result(resultFuture, Duration.Inf) match {
+    val result: Int = Await.result(reservationResult, Duration.Inf) match {
       case Left(false) => -1
       case Right(roomId) => roomId
       case _ => 0
@@ -121,10 +92,13 @@ class BookingActor extends Actor {
   }
 
   private def makeReservation(currentlyReserved: CurrentlyReservedClass) = {
-    val resultFuture = addReservation(currentlyReserved)
+    println("MAKEING RESERVATION.....")
+    val reservationResult = addReservation(currentlyReserved)
+    val bookingResult = addBooking(BookingClass(None, currentlyReserved.guestId, currentlyReserved.roomId, currentlyReserved.reservationStartDate, currentlyReserved.reservationEndDate))
 
     val result = try {
-      Await.result(resultFuture, 2.seconds) // Adjust the timeout duration as needed
+      Await.result(reservationResult, 2.seconds) // Adjust the timeout duration as needed
+      Await.result(bookingResult, 2.seconds) // Adjust the timeout duration as needed
     } catch {
       case e: Throwable =>
         println(s"Error waiting for result: $e")
@@ -132,10 +106,22 @@ class BookingActor extends Actor {
     result
   }
 
-      // Forward the booking request to the corresponding RoomActor
-//      getAllRoomActors.get(request.roomId).foreach(_ forward request)
+  //----------------------------------------------CANCELLING-LOGIC----------------------------------------------
+  private def cancleReservation(reservationId : Int) = {
+    println("CANCELING RESERVATION.....")
+    val cancellationResult = cancelReservation(reservationId)
+    //  val bookingResult = addBooking(BookingClass(None, currentlyReserved.guestId, currentlyReserved.roomId, currentlyReserved.reservationStartDate, currentlyReserved.reservationEndDate))
+
+    val result = try {
+    Await.result(cancellationResult, 2.seconds) // Adjust the timeout duration as needed
+    //    Await.result(bookingResult, 2.seconds) // Adjust the timeout duration as needed
+    } catch {
+      case e: Throwable =>
+      println(s"Error waiting for result: $e")
+    }
+    result
+  }
+
 }
-
-
 
 

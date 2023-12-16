@@ -70,5 +70,5 @@ object Main extends App {
 //      println(s"Error checking room availability: $ex")
 //  }
 
-  actorSystem.terminate()
+//  actorSystem.terminate()
 }

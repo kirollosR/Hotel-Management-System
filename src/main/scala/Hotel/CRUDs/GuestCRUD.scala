@@ -33,6 +33,9 @@ object GuestCRUD {
   def deleteGuest(guestId: Int): Future[Int] =
     db.run(GuestTable.filter(_.id === guestId).delete)
 
+  def getGuestIdByName(name: String): Future[Option[Option[Int]]] =
+    db.run(GuestTable.filter(_.name === name).map(_.id).result.headOption)
+
 
 //// ------------------ CRUD WITH ERROR HANDLING ------------------
 //

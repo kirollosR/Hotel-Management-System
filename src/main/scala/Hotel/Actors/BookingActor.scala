@@ -1,9 +1,9 @@
 package Hotel.Actors
-import Hotel.Actors.BookingActor.{Book, Cancel}
+import Hotel.Actors.BookingActor.{Book, Cancel, getUpcomingBookings}
 import Hotel.Actors.CurrenltReservedActor.makeReservation
-import Hotel.CRUDs.BookingCRUD.{addBooking, cancelBooking}
+import Hotel.CRUDs.BookingCRUD.{addBooking, cancelBooking, getUpcomingBooking}
 import Hotel.CRUDs.CurrentlyReservedCRUD.{addReservation, cancelReservation, findAvailableRoom, isRoomReserved}
-import Hotel.CRUDs.{CurrentlyReservedCRUD, RoomCRUD}
+import Hotel.CRUDs.{BookingCRUD, CurrentlyReservedCRUD, RoomCRUD}
 import Hotel.PrivateExecutor._
 import Hotel.Models.Room.RoomTable
 import Hotel.Models.{BookingClass, CurrentlyReservedClass, RoomClass}
@@ -24,6 +24,7 @@ import scala.util.{Failure, Success}
 object BookingActor{
   case class Book(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate, guestId: Int)
   case class Cancel(reservationId: Int)
+  case class getUpcomingBookings()
 }
 
 
@@ -50,6 +51,22 @@ class BookingActor extends Actor {
 
     case Cancel(reservationId: Int) => {
       cancleReservation(reservationId)
+    }
+
+    case getUpcomingBookings() => {
+      getFutureBookings()
+    }
+  }
+
+  private def getFutureBookings() = {
+    val result = Await.result(getUpcomingBooking(), 2.seconds)
+    result.foreach {
+      case (booking, guest) =>
+        println(s"Booking ID: ${booking.id.getOrElse("N/A")}, Room ID: ${booking.roomId}, " +
+          s"Start Date: ${booking.reservationStartDate}, End Date: ${booking.reservationEndDate}, " +
+          s"Guest ID: ${booking.guestId}, " +
+          s"Guest Name: ${guest.name}, Status: ${guest.status}, " +
+          s"Email: ${guest.email}, Phone: ${guest.phone}")
     }
   }
 
@@ -114,7 +131,7 @@ class BookingActor extends Actor {
 
   //----------------------------------------------CANCELLING-LOGIC----------------------------------------------
   private def cancleReservation(reservationId : Int) = {
-    println("CANCELING RESERVATION.....")
+    println("CANCELING BOOKING.....")
     val cancellationResult = cancelReservation(reservationId)
     val cancelBookingResult = cancelBooking(reservationId)
     //  val bookingResult = addBooking(BookingClass(None, currentlyReserved.guestId, currentlyReserved.roomId, currentlyReserved.reservationStartDate, currentlyReserved.reservationEndDate))

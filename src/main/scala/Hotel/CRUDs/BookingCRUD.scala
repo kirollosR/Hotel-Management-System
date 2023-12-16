@@ -30,35 +30,19 @@ object BookingCRUD {
     db.run(query)
   }
 
-//  def isRoomReserved(roomId: Int, startDate: LocalDate, endDate: LocalDate): Future[Boolean] = {
-//    val slickQuery = CurrentlyReservedTable
-//      .filter(reservation =>
-//        reservation.roomId === roomId &&
-//          reservation.reservationStartDate <= endDate &&
-//          reservation.reservationEndDate >= startDate
-//      )
-//      .exists
-//      .result
-//
-//    db.run(slickQuery)
-//  }
+  def getAllFutureBookings(): Future[Seq[BookingClass]] = {
+    val query = BookingTable.filter(_.reservationStartDate >= LocalDate.now()).result
+    db.run(query)
+  }
 
-//  def findAvailableRoom(rooms: Seq[RoomClass], startDate: LocalDate, endDate: LocalDate): Future[Either[Boolean, Int]] = {
-//    // Create a Future[Boolean] for each room and collect them into a Seq[Future[Boolean]]
-//    val roomChecks: Seq[Future[Boolean]] = rooms.map(room => isRoomReserved(room.id, startDate, endDate))
-//
-//    // Use Future.sequence to transform Seq[Future[Boolean]] into Future[Seq[Boolean]]
-//    val allRoomChecks: Future[Seq[Boolean]] = Future.sequence(roomChecks)
-//
-//    // Use map to process the result when all the room checks are completed
-//    allRoomChecks.map { results =>
-//      // Find the index of the first false result
-//      results.indexOf(false) match {
-//        case index if index != -1 => Right(rooms(index).id) // Room is available, return its id
-//        case _ => Left(false) // All rooms are reserved
-//      }
-//    }
-//  }
+  def getUpcomingBooking(): Future[Seq[(BookingClass, GuestClass)]] = {
+    val today = LocalDate.now()
+    val query = for {
+      (booking, guest) <- BookingTable.filter(_.reservationStartDate >= today) join GuestTable on (_.guestId === _.id)
+    } yield (booking, guest)
+    db.run(query.result)
+  }
+
 
 
 

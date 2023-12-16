@@ -1,6 +1,7 @@
 package Hotel
 
 import Hotel.Actors._
+import Hotel.CRUDs.BookingCRUD.getUpcomingBooking
 import Hotel.CRUDs.CurrentlyReservedCRUD.addReservation
 import Hotel.CRUDs.GuestCRUD.addGuest
 import Hotel.Models.{CurrentlyReservedClass, GuestClass}
@@ -51,7 +52,15 @@ object Main extends App {
 //  currenltlyReservedActor ! CurrenltReservedActor.makeReservation(CurrentlyReservedClass(None, 1, LocalDate.of(2023, 12, 20), LocalDate.of(2023, 12, 25), 1))
   user ! User.LiveTheLife
 
-
+//  val result = Await.result(getUpcomingBookings(), 2.seconds)
+//  result.foreach {
+//    case (booking, guest) =>
+//      println(s"Booking ID: ${booking.id.getOrElse("N/A")}, Room ID: ${booking.roomId}, " +
+//        s"Start Date: ${booking.reservationStartDate}, End Date: ${booking.reservationEndDate}, " +
+//        s"Guest ID: ${booking.guestId}, " +
+//        s"Guest Name: ${guest.name}, Status: ${guest.status}, " +
+//        s"Email: ${guest.email}, Phone: ${guest.phone}")
+//  }
 
 //  val newGuest = GuestClass(None, "sayed", status = false, "sayeds", "065341859")
 //

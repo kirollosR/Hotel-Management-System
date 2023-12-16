@@ -40,7 +40,7 @@ class User extends Actor {
   override def receive: Receive = {
     case LiveTheLife => {
       var choice = options()
-      while(choice != 0) {
+      while (choice != 0) {
         choice match {
           case 1 => Booking()
           case 2 => cancelBooking()
@@ -48,15 +48,17 @@ class User extends Actor {
           case 4 => println("Update Guest")
           case 5 => println("Delete Guest")
           case 6 => println("Get All Guests")
-          case 7 => bookingActor ! getUpcomingBookings()
+          case 7 => println("Get All Upcoming Bookings")
           case _ => println("Invalid choice")
         }
+
         Thread.sleep(1000)
         choice = options()
       }
-      if(choice == 0) {
+
+      if (choice == 0) {
         println("Exiting...")
-        context.system.terminate()
+        // Additional cleanup or termination logic
       }
 
 
@@ -82,8 +84,13 @@ class User extends Actor {
     println("7. Get All Upcoming Bookings")
     println("0. Exit")
     print("Enter your choice: ")
+
     val choice = StdIn.readInt()
     choice
+  }
+
+  private def updateGuest(): Unit = {
+
   }
 
   private def cancelBooking(): Unit = {
@@ -103,51 +110,60 @@ class User extends Actor {
       } else {
         val allGuests = Await.result(getAllGuests, timeout.duration)
 
-        if (guestName.nonEmpty && allGuests.exists(_.name == guestName)) {
+        if (guestName.nonEmpty) {
           val guests = Await.result(findGuestsByName(guestName), timeout.duration)
-          guests.foreach {
-            guest =>
-              val id = guest.id.getOrElse(-1)
-              println(s"Guest ID: ${id} | Name: ${guest.name} | Status: ${guest.status} | Phone: ${guest.phone}")
-          }
-          print("Did you find the guest you were looking for? (y/n): ")
-          val foundGuest = StdIn.readLine().toLowerCase == "y"
-          if (foundGuest) {
-            print("Enter guest ID: ")
-            val guestId = StdIn.readInt()
-            print("Enter start date (yyyy-MM-dd): ")
-            val startDate = readLocalDate()
-            print("Enter end date (yyyy-MM-dd): ")
-            val endDate = readLocalDate()
-            print("Enter room capacity: ")
-            val roomCapacity = StdIn.readInt()
+          if (guests.nonEmpty) {
+            guests.foreach {
+              guest =>
+                val id = guest.id.getOrElse(-1)
+                println(s"Guest ID: ${id} | Name: ${guest.name} | Status: ${guest.status} | Phone: ${guest.phone}")
+            }
 
-            bookingActor ! Book(roomCapacity, startDate, endDate, guestId)
-
-            validGuestName = true // Exit the loop when a valid name is entered
+            print("Did you find the guest you were looking for? (y/n): ")
+            val foundGuest = StdIn.readLine().toLowerCase == "y"
+            if (foundGuest) {
+              print("Enter guest ID: ")
+              val guestId = StdIn.readInt()
+              createBooking(guestId)
+              validGuestName = true // Exit the loop when a valid name is entered
+            } else {
+              val guestId = addNewGuest(guestName)
+              createBooking(guestId)
+              validGuestName = true // Exit the loop when a valid name is entered
+            }
           } else {
-            println("Add new Guest")
-            // add new guest function
-
-            print("Enter guest ID: ")
-            val guestId = StdIn.readInt()
-            print("Enter start date (yyyy-MM-dd): ")
-            val startDate = readLocalDate()
-            print("Enter end date (yyyy-MM-dd): ")
-            val endDate = readLocalDate()
-            print("Enter room capacity: ")
-            val roomCapacity = StdIn.readInt()
-
-            bookingActor ! Book(roomCapacity, startDate, endDate, guestId)
-
-            validGuestName = true // Exit the loop when a valid name is entered
+            val guestId = addNewGuest(guestName)
+            createBooking(guestId)
+            validGuestName = true
           }
-
-        } else {
-          println("Invalid guest name. Please try again.")
         }
       }
     }
+  }
+
+  private def createBooking(guestId: Int): Unit = {
+    print("Enter start date (yyyy-MM-dd): ")
+    val startDate = readLocalDate()
+    print("Enter end date (yyyy-MM-dd): ")
+    val endDate = readLocalDate()
+    print("Enter room capacity: ")
+    val roomCapacity = StdIn.readInt()
+
+    bookingActor ! Book(roomCapacity, startDate, endDate, guestId)
+  }
+
+  private def addNewGuest(guestName: String): Int = {
+    println("Add new Guest")
+//    print("Enter guest name: ")
+//    val guestName = StdIn.readLine()
+    print("Enter guest email: ")
+    val guestEmail = StdIn.readLine()
+    print("Enter guest phone: ")
+    val guestPhone = StdIn.readLine()
+
+    val futureResponse = (guestActor ? AddGuest(GuestClass(None, guestName, status = false, guestEmail, guestPhone)))
+    val guestId = Await.result(futureResponse, timeout.duration)
+    guestId.asInstanceOf[Int]
   }
 
   def readLocalDate(): LocalDate = {

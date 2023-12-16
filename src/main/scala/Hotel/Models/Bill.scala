@@ -10,7 +10,7 @@ case class BillClass(
                       amount: Double,
                       issuedDate: LocalDate
 )
-class Bill {
+
   object Bill {
     import slick.jdbc.MySQLProfile.api._
 
@@ -29,4 +29,4 @@ class Bill {
 
   }
 
-}
+

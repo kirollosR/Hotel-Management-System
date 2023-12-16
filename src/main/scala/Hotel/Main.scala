@@ -17,6 +17,7 @@ object Main extends App {
 
   val actorSystem = ActorSystem("Hotel-Managment-System")
   val user = actorSystem.actorOf(Props[User], "User")
+  val guestActor = actorSystem.actorOf(Props[GuestActor], "GuestActor")
   val currenltlyReservedActor = actorSystem.actorOf(Props[CurrenltReservedActor], "CurrenltReservedActor")
   val bookingActor = actorSystem.actorOf(Props[BookingActor], "BookingActor")
   val roomActor = actorSystem.actorOf(Props[RoomActor], "RoomActor")

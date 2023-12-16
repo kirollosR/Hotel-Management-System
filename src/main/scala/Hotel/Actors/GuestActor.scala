@@ -24,9 +24,10 @@ class GuestActor extends Actor {
 
   override def receive: Receive = {
     case AddGuest(guest) =>
+      println("Adding guest ")
       val result = Await.result(addGuest(guest), 2.seconds)
       sender() ! result
-      println(s"Guest ${guest.name} added successfully with ID ${guest.id}")
+//      println(s"Guest ${guest.name} added successfully with ID ${guest.id}")
 
     case UpdateGuest(guest) =>
       println("Updating guest ")

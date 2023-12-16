@@ -36,6 +36,11 @@ object GuestCRUD {
   def getGuestIdByName(name: String): Future[Option[Option[Int]]] =
     db.run(GuestTable.filter(_.name === name).map(_.id).result.headOption)
 
+  def findGuestsByName(substring: String): Future[Seq[GuestClass]] = {
+    val query = GuestTable.filter(_.name like s"%$substring%").result
+    db.run(query)
+  }
+
 
 //// ------------------ CRUD WITH ERROR HANDLING ------------------
 //

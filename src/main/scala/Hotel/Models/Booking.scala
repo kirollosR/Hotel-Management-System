@@ -6,10 +6,10 @@ import java.time.LocalDate
 
 case class BookingClass(
        id: Option[Int],
-       guestId: Int,
        roomId: Int,
        reservationStartDate: LocalDate,
        reservationEndDate: LocalDate,
+       guestId: Int,
 )
 object Booking {
   import slick.jdbc.MySQLProfile.api._
@@ -22,10 +22,10 @@ object Booking {
     def reservationEndDate = column[LocalDate]("reservation_end_date")
 
     // mapping function to transform from tuple to domain object and vice versa
-    override def * = (id, guestId, roomId, reservationStartDate, reservationEndDate) <> (BookingClass.tupled, BookingClass.unapply)
+    override def * = (id, roomId, reservationStartDate, reservationEndDate, guestId) <> (BookingClass.tupled, BookingClass.unapply)
   }
   lazy val BookingTable = TableQuery[BookingTable]
 
-  implicit val getBookingResult = GetResult(r => BookingClass(r.nextIntOption(), r.nextInt, r.nextInt, r.nextDate.toLocalDate, r.nextDate.toLocalDate))
+  implicit val getBookingResult = GetResult(r => BookingClass(r.nextIntOption(), r.nextInt, r.nextDate.toLocalDate, r.nextDate.toLocalDate, r.nextInt))
 
 }

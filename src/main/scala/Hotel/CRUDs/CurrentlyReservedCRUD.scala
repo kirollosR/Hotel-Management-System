@@ -54,7 +54,7 @@ object CurrentlyReservedCRUD {
   }
 
   def cancelReservation(reservationId: Int): Future[Int] = {
-    val result: Future[Int] = db.run(CurrentlyReservedTable.filter(_.id === reservationId).delete)
+    val result: Future[Int] = db.run(CurrentlyReservedTable.filter(_.bookingId === reservationId).delete)
     result
   }
 

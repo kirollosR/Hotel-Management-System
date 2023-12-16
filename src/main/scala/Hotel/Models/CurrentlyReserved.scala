@@ -4,12 +4,13 @@ import slick.jdbc.GetResult
 import java.time.LocalDate
 
 case class CurrentlyReservedClass(
-                                   id: Option[Int],
-                                   roomId: Int,
-                                   reservationStartDate: LocalDate,
-                                   reservationEndDate: LocalDate,
-                                   guestId: Int
-                                  )
+       id: Option[Int],
+       roomId: Int,
+       reservationStartDate: LocalDate,
+       reservationEndDate: LocalDate,
+       guestId: Int,
+       bookingId: Int
+)
 object CurrentlyReserved {
   import slick.jdbc.MySQLProfile.api._
 
@@ -19,12 +20,13 @@ object CurrentlyReserved {
     def reservationStartDate = column[LocalDate]("reservation_start_date")
     def reservationEndDate = column[LocalDate]("reservation_end_date")
     def guestId = column[Int]("guest_id")
+    def bookingId = column[Int]("booking_id")
 
     // mapping function to transform from tuple to domain object and vice versa
-    override def * = (id, roomId, reservationStartDate, reservationEndDate, guestId) <> (CurrentlyReservedClass.tupled, CurrentlyReservedClass.unapply)
+    override def * = (id, roomId, reservationStartDate, reservationEndDate, guestId, bookingId) <> (CurrentlyReservedClass.tupled, CurrentlyReservedClass.unapply)
   }
   lazy val CurrentlyReservedTable = TableQuery[CurrentlyReservedTable]
 
-  implicit val getCurrentlyReservedResult = GetResult(r => CurrentlyReservedClass(r.nextIntOption(), r.nextInt, r.nextDate.toLocalDate, r.nextDate.toLocalDate,  r.nextInt))
+  implicit val getCurrentlyReservedResult = GetResult(r => CurrentlyReservedClass(r.nextIntOption(), r.nextInt, r.nextDate.toLocalDate, r.nextDate.toLocalDate,  r.nextInt, r.nextInt))
 
 }

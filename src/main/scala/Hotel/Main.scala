@@ -2,7 +2,8 @@ package Hotel
 
 import Hotel.Actors._
 import Hotel.CRUDs.CurrentlyReservedCRUD.addReservation
-import Hotel.Models.CurrentlyReservedClass
+import Hotel.CRUDs.GuestCRUD.addGuest
+import Hotel.Models.{CurrentlyReservedClass, GuestClass}
 import akka.actor.{ActorSystem, Props}
 
 import java.time.LocalDate
@@ -52,7 +53,7 @@ object Main extends App {
 
 
 
-//  val newGuest = GuestClass(None, "sayed", status = false, "sayed", "06541859")
+//  val newGuest = GuestClass(None, "sayed", status = false, "sayeds", "065341859")
 //
 //// ----ADD GUEST----
 //  val addGuestResult = Await.result(addGuest(newGuest), 2.seconds)

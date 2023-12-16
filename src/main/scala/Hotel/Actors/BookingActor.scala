@@ -1,7 +1,7 @@
 package Hotel.Actors
 import Hotel.Actors.BookingActor.{Book, Cancel}
 import Hotel.Actors.CurrenltReservedActor.makeReservation
-import Hotel.CRUDs.BookingCRUD.addBooking
+import Hotel.CRUDs.BookingCRUD.{addBooking, cancelBooking}
 import Hotel.CRUDs.CurrentlyReservedCRUD.{addReservation, cancelReservation, findAvailableRoom, isRoomReserved}
 import Hotel.CRUDs.{CurrentlyReservedCRUD, RoomCRUD}
 import Hotel.PrivateExecutor._
@@ -18,6 +18,7 @@ import akka.util.Timeout
 import akka.pattern.ask
 
 import java.time.LocalDate
+import scala.:+
 import scala.util.{Failure, Success}
 
 object BookingActor{
@@ -54,14 +55,14 @@ class BookingActor extends Actor {
 
 
 
-//----------------------------------------------BOOKING-LOGIC----------------------------------------------
+  //----------------------------------------------BOOKING-LOGIC----------------------------------------------
   private def bookingHandeling(roomCapacity: Int, startDate: LocalDate, endDate: LocalDate, guestId: Int) = {
     val rooms = getAllRoomsByCapacity(roomCapacity)
     val result: Int = Await.result(Future(roomAvailable(roomCapacity, startDate, endDate)), Duration.Inf)
-//    println(result)
+    //    println(result)
     if (result != -1) {
-//      println(s"Room $result is available")
-      val currentlyReservedClass = CurrentlyReservedClass(None, result, startDate, endDate, guestId)
+      //      println(s"Room $result is available")
+      val currentlyReservedClass: (Option[Int], Int, LocalDate, LocalDate, Int) = (None, result, startDate, endDate, guestId)
 
       val futureResponse = Await.result(Future(makeReservation(currentlyReservedClass)), timeout.duration)
       //        val response = Await.result(futureResponse, timeout.duration)
@@ -91,10 +92,15 @@ class BookingActor extends Actor {
     Await.result(RoomCRUD.getAllRoomsByCapacity(capacity), Duration.Inf)
   }
 
-  private def makeReservation(currentlyReserved: CurrentlyReservedClass) = {
+  private def makeReservation(currentlyReserved: (Option[Int], Int, LocalDate, LocalDate, Int)) = {
     println("MAKEING RESERVATION.....")
-    val reservationResult = addReservation(currentlyReserved)
-    val bookingResult = addBooking(BookingClass(None, currentlyReserved.guestId, currentlyReserved.roomId, currentlyReserved.reservationStartDate, currentlyReserved.reservationEndDate))
+    val currentlyReservedBooking: BookingClass = BookingClass.tupled(currentlyReserved)
+    val bookingResult = addBooking(currentlyReservedBooking)
+    val bookingId = Await.result(bookingResult, 2.seconds)
+    val temp: (Option[Int], Int, LocalDate, LocalDate, Int, Int) = (
+      currentlyReserved._1, currentlyReserved._2, currentlyReserved._3, currentlyReserved._4, currentlyReserved._5, bookingId)
+    val currentlyReservedClass: CurrentlyReservedClass = CurrentlyReservedClass.tupled(temp)
+    val reservationResult = addReservation(currentlyReservedClass)
 
     val result = try {
       Await.result(reservationResult, 2.seconds) // Adjust the timeout duration as needed
@@ -110,18 +116,17 @@ class BookingActor extends Actor {
   private def cancleReservation(reservationId : Int) = {
     println("CANCELING RESERVATION.....")
     val cancellationResult = cancelReservation(reservationId)
+    val cancelBookingResult = cancelBooking(reservationId)
     //  val bookingResult = addBooking(BookingClass(None, currentlyReserved.guestId, currentlyReserved.roomId, currentlyReserved.reservationStartDate, currentlyReserved.reservationEndDate))
 
     val result = try {
-    Await.result(cancellationResult, 2.seconds) // Adjust the timeout duration as needed
-    //    Await.result(bookingResult, 2.seconds) // Adjust the timeout duration as needed
+      Await.result(cancellationResult, 2.seconds) // Adjust the timeout duration as needed
+      Await.result(cancelBookingResult, 2.seconds) // Adjust the timeout duration as needed
     } catch {
       case e: Throwable =>
-      println(s"Error waiting for result: $e")
+        println(s"Error waiting for result: $e")
     }
     result
   }
 
 }
-
-

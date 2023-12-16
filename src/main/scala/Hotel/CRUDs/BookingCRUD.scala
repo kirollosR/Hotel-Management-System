@@ -25,6 +25,11 @@ object BookingCRUD {
     db.run(query)
   }
 
+  def cancelBooking(bookingId: Int): Future[Int] = {
+    val query = BookingTable.filter(_.id === bookingId).delete
+    db.run(query)
+  }
+
 //  def isRoomReserved(roomId: Int, startDate: LocalDate, endDate: LocalDate): Future[Boolean] = {
 //    val slickQuery = CurrentlyReservedTable
 //      .filter(reservation =>

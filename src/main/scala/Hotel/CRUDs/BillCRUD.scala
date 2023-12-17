@@ -31,6 +31,12 @@ object BillCRUD {
   def getBookingIdByGuestIdAndEndDate(guestId: Int, endDate: LocalDate): Future[Option[Option[Int]]] =
     db.run(BookingTable.filter(booking => booking.guestId === guestId && booking.reservationEndDate === endDate).map(_.id).result.headOption)
 
+  def checkStartDate(guestId: Int, startDate: LocalDate): Future[Boolean] =
+    db.run(BookingTable.filter(booking => booking.guestId === guestId && booking.reservationStartDate === startDate).map(_.reservationStartDate).exists.result)
+
+  def checkEndDate(guestId: Int, endDate: LocalDate): Future[Boolean] =
+    db.run(BookingTable.filter(booking => booking.guestId === guestId && booking.reservationEndDate === endDate).map(_.reservationEndDate).exists.result)
+
   //------------------ ComplexCRUD to CALCULATE Amount ------------------
   def getBillAmountByBookingId(bookingId: Int): Future[Option[Double]] = {
     val bookingFuture: Future[Option[BookingClass]] = BookingCRUD.getBookingById(bookingId)

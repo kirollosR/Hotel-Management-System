@@ -41,6 +41,11 @@ object GuestCRUD {
     db.run(query)
   }
 
+  def findGuestIdByName(substring: String): Future[Seq[Option[Int]]] = {
+    val query = GuestTable.filter(_.name like s"%$substring%").map(_.id).result
+    db.run(query)
+  }
+
   def findAllGuestsMails : Future[Seq[String]] = {
     val query = GuestTable.map(_.email).result
     db.run(query)

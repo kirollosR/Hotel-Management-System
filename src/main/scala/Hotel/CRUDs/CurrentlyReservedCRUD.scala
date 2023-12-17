@@ -58,6 +58,11 @@ object CurrentlyReservedCRUD {
     result
   }
 
+  def countUpcomingReservations(): Future[Int] = {
+    val result: Future[Int] = db.run(CurrentlyReservedTable.length.result)
+    result
+  }
+
 
 
 }

@@ -28,21 +28,8 @@ object RoomCRUD {
   def getAllRoomsByCapacity(capacity: Int): Future[Seq[RoomClass]] =
     db.run(RoomTable.filter(_.capacity === capacity).result)
 
-//  def addGuest(guest: GuestClass): Future[Int] = {
-//    val result: Future[Option[Int]] = db.run(GuestTable returning GuestTable.map(_.id) += guest)
-//    result.map(_.get)
-//  }
-//
-//  def getGuestById(guestId: Int): Future[Option[GuestClass]] =
-//    db.run(GuestTable.filter(_.id === guestId).result.headOption)
-//
-//  def getAllGuests: Future[Seq[GuestClass]] =
-//    db.run(GuestTable.result)
-//
-//  def updateGuest(guest: GuestClass): Future[Int] =
-//    db.run(GuestTable.filter(_.id === guest.id).update(guest))
-//
-//  def deleteGuest(guestId: Int): Future[Int] =
-//    db.run(GuestTable.filter(_.id === guestId).delete)
+  def countRooms(): Future[Int] =
+    db.run(RoomTable.length.result)
+
 
 }

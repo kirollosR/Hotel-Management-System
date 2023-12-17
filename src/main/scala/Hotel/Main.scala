@@ -23,7 +23,7 @@ object Main extends App {
   val currenltlyReservedActor = actorSystem.actorOf(Props[CurrenltReservedActor], "CurrenltReservedActor")
   val bookingActor = actorSystem.actorOf(Props[BookingActor], "BookingActor")
   val roomActor = actorSystem.actorOf(Props[RoomActor], "RoomActor")
-
+  val reportActor = actorSystem.actorOf(Props[ReportActor], "ReportActor")
 //  val result = Await.result(getAllRoomsByCapacity(2), 2.seconds)
 //  println(result)
 

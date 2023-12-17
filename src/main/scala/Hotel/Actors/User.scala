@@ -2,8 +2,10 @@ package Hotel.Actors
 
 import Hotel.Actors.BookingActor.{Book, _}
 import Hotel.Actors.GuestActor.{AddGuest, AllGuests, DeleteGuest, UpdateGuest}
+import Hotel.Actors.ReportActor.{CountAllBookings, CountAvaialableGuests, CountGuests, CountRooms, CountUpcomingBookings}
 import Hotel.Actors.User.LiveTheLife
 import Hotel.CRUDs.GuestCRUD.{addGuest, findGuestsByName, getAllGuests, getGuestById, getGuestIdByName}
+import Hotel.CRUDs.RoomCRUD.countRooms
 import akka.actor.Actor
 import Hotel.Main._
 import Hotel.Models.{CurrentlyReservedClass, GuestClass}
@@ -38,6 +40,7 @@ class User extends Actor {
           case 4 => deleteGuest()
           case 5 => guestActor ! AllGuests()
           case 6 => bookingActor ! getUpcomingBookings()
+          case 7 => report()
           case _ => println("Invalid choice")
         }
 
@@ -71,6 +74,7 @@ class User extends Actor {
     println("4. Delete Guest")
     println("5. Get All Guests")
     println("6. Get All Upcoming Bookings")
+    println("7. Report")
     println("0. Exit")
     print("Enter your choice: ")
 
@@ -78,8 +82,33 @@ class User extends Actor {
     choice
   }
 
-  private def allGuests(): Unit = {
-    guestActor ! AllGuests()
+  private def report(): Unit = {
+    println("Report")
+    print("1. Number of ALl rooms: ")
+    val futureResponse = (reportActor ? CountRooms())
+    val result = Await.result(futureResponse, timeout.duration)
+    print(result + "\n")
+
+    print("2. Number of all guests: ")
+    val futureResponse2 = (reportActor ? CountGuests())
+    val result2 = Await.result(futureResponse2, timeout.duration)
+    print(result2 + "\n")
+
+    print("3. Number of guests in the hotel now: ")
+    val futureResponse3 = (reportActor ? CountAvaialableGuests())
+    val result3 = Await.result(futureResponse3, timeout.duration)
+    print(result3 + "\n")
+
+    print("4. Number of upcoming bookings: ")
+    val futureResponse4 = (reportActor ? CountUpcomingBookings())
+    val result4 = Await.result(futureResponse4, timeout.duration)
+    print(result4 + "\n")
+
+    print("5. Number of all bookings: ")
+    val futureResponse5 = (reportActor ? CountAllBookings())
+    val result5 = Await.result(futureResponse5, timeout.duration)
+    print(result5 + "\n")
+
 
   }
 

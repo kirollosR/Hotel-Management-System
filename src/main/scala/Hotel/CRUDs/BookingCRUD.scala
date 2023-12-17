@@ -43,7 +43,6 @@ object BookingCRUD {
     db.run(query.result)
   }
 
-
-
-
+  def countAllBookings(): Future[Int] =
+    db.run(BookingTable.length.result)
 }

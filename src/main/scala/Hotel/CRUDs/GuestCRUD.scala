@@ -51,6 +51,12 @@ object GuestCRUD {
     db.run(query)
   }
 
+  def countAvailableGuests(): Future[Int] =
+    db.run(GuestTable.filter(_.status === true).length.result)
+
+  def countGuests(): Future[Int] =
+    db.run(GuestTable.length.result)
+
 //// ------------------ CRUD WITH ERROR HANDLING ------------------
 //
 //

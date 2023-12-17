@@ -28,7 +28,7 @@ class User extends Actor {
   implicit val timeout: Timeout = Timeout(5.seconds)
 
   var validGuestName = false
-  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+  val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
   override def receive: Receive = {
     case LiveTheLife => {
       var choice = options()
@@ -66,6 +66,7 @@ class User extends Actor {
   }
 
   private def options(): Int = {
+    println("------------------------------------------------------")
     println("Welcome to the Hotel Management System")
     println("Please select an option:")
     println("1. Booking")
@@ -83,28 +84,28 @@ class User extends Actor {
   }
 
   private def report(): Unit = {
-    println("Report")
-    print("1. Number of ALl rooms: ")
+    println("Report:")
+    print("\t 1. Number of Rooms: ")
     val futureResponse = (reportActor ? CountRooms())
     val result = Await.result(futureResponse, timeout.duration)
     print(result + "\n")
 
-    print("2. Number of all guests: ")
+    print("\t 2. Number of Guests: ")
     val futureResponse2 = (reportActor ? CountGuests())
     val result2 = Await.result(futureResponse2, timeout.duration)
     print(result2 + "\n")
 
-    print("3. Number of guests in the hotel now: ")
+    print("\t 3. Number of guests in the hotel now: ")
     val futureResponse3 = (reportActor ? CountAvaialableGuests())
     val result3 = Await.result(futureResponse3, timeout.duration)
     print(result3 + "\n")
 
-    print("4. Number of upcoming bookings: ")
+    print("\t 4. Number of upcoming bookings: ")
     val futureResponse4 = (reportActor ? CountUpcomingBookings())
     val result4 = Await.result(futureResponse4, timeout.duration)
     print(result4 + "\n")
 
-    print("5. Number of all bookings: ")
+    print("\t 5. Number of all bookings: ")
     val futureResponse5 = (reportActor ? CountAllBookings())
     val result5 = Await.result(futureResponse5, timeout.duration)
     print(result5 + "\n")
@@ -218,9 +219,9 @@ class User extends Actor {
   }
 
   private def createBooking(guestId: Int): Unit = {
-    print("Enter start date (yyyy-MM-dd): ")
+    print("Enter start date (dd-MM-yyyy): ")
     val startDate = readLocalDate()
-    print("Enter end date (yyyy-MM-dd): ")
+    print("Enter end date (dd-MM-yyyy): ")
     val endDate = readLocalDate()
     print("Enter room capacity: ")
     val roomCapacity = StdIn.readInt()

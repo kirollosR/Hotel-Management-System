@@ -45,4 +45,10 @@ object BookingCRUD {
 
   def countAllBookings(): Future[Int] =
     db.run(BookingTable.length.result)
+  def getBookingById(bookingId: Int): Future[Option[BookingClass]] = {
+    val query = BookingTable.filter(_.id === bookingId).result.headOption
+    db.run(query)
+  }
+
+
 }

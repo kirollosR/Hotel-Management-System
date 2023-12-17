@@ -5,18 +5,18 @@ import slick.jdbc.GetResult
 import java.time.LocalDate
 
 case class BillClass(
-                      id: Int,
-                      bookingId: Int,
-                      amount: Double,
-                      issuedDate: LocalDate,
-                      guestId: Int
+      id: Option[Int],
+      bookingId: Int,
+      amount: Double,
+      issuedDate: LocalDate,
+      guestId: Int
 )
 
 object Bill {
   import slick.jdbc.MySQLProfile.api._
 
   class BillTable(tag: Tag) extends Table[BillClass](tag, "bill") {
-    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+    def id = column[Option[Int]]("id", O.PrimaryKey, O.AutoInc)
     def bookingId = column[Int]("booking_id")
     def amount = column[Double]("amount")
     def issuedDate = column[LocalDate]("issued_date")
@@ -27,7 +27,7 @@ object Bill {
   }
   lazy val BillTable = TableQuery[BillTable]
 
-  implicit val getBillResult = GetResult(r => BillClass(r.nextInt, r.nextInt, r.nextDouble, r.nextDate.toLocalDate, r.nextInt))
+  implicit val getBillResult = GetResult(r => BillClass(r.nextIntOption, r.nextInt, r.nextDouble, r.nextDate.toLocalDate, r.nextInt))
 
 }
 

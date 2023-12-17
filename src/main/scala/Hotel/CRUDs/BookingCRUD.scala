@@ -43,7 +43,10 @@ object BookingCRUD {
     db.run(query.result)
   }
 
-
+  def getBookingById(bookingId: Int): Future[Option[BookingClass]] = {
+    val query = BookingTable.filter(_.id === bookingId).result.headOption
+    db.run(query)
+  }
 
 
 }

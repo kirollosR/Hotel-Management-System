@@ -1,16 +1,16 @@
 package Hotel.CRUDs
 
 import Hotel.Models.Booking.BookingTable
-import Hotel.Models.CurrentlyReserved._
+
 import Hotel.Models.Guest.GuestTable
 import Hotel.Models.{BookingClass, CurrentlyReservedClass, Guest, GuestClass, RoomClass}
 import Hotel.PrivateExecutor._
 import Hotel.connection.db
 
 import java.time.LocalDate
-import java.util.concurrent.Executors
+
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+
 
 object BookingCRUD {
   import slick.jdbc.MySQLProfile.api._

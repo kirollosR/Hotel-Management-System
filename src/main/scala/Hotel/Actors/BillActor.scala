@@ -3,19 +3,18 @@ package Hotel.Actors
 
 import Hotel.Actors.BillActor.{CheckIn, CheckOut}
 import Hotel.CRUDs.BillCRUD.{addBill, checkEndDate, checkStartDate, getBillAmountByBookingId, getBookingIdByGuestIdAndEndDate, getBookingIdByGuestIdAndStartDate}
-import Hotel.CRUDs.GuestCRUD.{findGuestsByName, getGuestById, getGuestIdByName, updateGuest}
-import Hotel.CRUDs.CurrentlyReservedCRUD.{cancelReservation, findAvailableRoom, getReservationIdByBookingId}
+import Hotel.CRUDs.GuestCRUD.{findGuestsByName, getGuestById, updateGuest}
+import Hotel.CRUDs.CurrentlyReservedCRUD.cancelReservation
 import Hotel.Main.guestActor
 import Hotel.Models.{BillClass, GuestClass}
 import akka.actor.{Actor, Props}
 import akka.util.Timeout
-import slick.ast.Library.Not
+
 
 import java.time.format.DateTimeFormatter
 import scala.concurrent.duration.DurationInt
 import scala.io.StdIn
-import scala.util.control.Exception.nonFatalCatch
-import scala.concurrent.duration._
+
 import java.time.LocalDate
 import scala.concurrent.Await
 
@@ -39,13 +38,7 @@ class BillActor extends Actor {
     }
   }
 
-
-
-
   def checkIn(): Unit = {
-//    print("Enter guest name: ")
-//    val guestName = scala.io.StdIn.readLine()
-//    val guestId = Await.result(getGuestIdByName(guestName), timeout.duration).get.get
     print("Enter guest name: ")
     val guestName = StdIn.readLine()
     val guests = Await.result(findGuestsByName(guestName), timeout.duration)

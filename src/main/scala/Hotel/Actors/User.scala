@@ -1,14 +1,15 @@
 package Hotel.Actors
 
+import Hotel.Actors.BillActor.{CheckIn, CheckOut}
 import Hotel.Actors.BookingActor.{Book, _}
 import Hotel.Actors.GuestActor.{AddGuest, AllGuests, DeleteGuest, UpdateGuest}
 import Hotel.Actors.ReportActor.{CountAllBookings, CountAvaialableGuests, CountGuests, CountRooms, CountUpcomingBookings}
 import Hotel.Actors.User.LiveTheLife
-import Hotel.CRUDs.GuestCRUD.{addGuest, findGuestsByName, getAllGuests, getGuestById, getGuestIdByName}
-import Hotel.CRUDs.RoomCRUD.countRooms
+import Hotel.CRUDs.GuestCRUD.{findGuestsByName, getGuestById}
+
 import akka.actor.Actor
 import Hotel.Main._
-import Hotel.Models.{CurrentlyReservedClass, GuestClass}
+import Hotel.Models.GuestClass
 import akka.util.Timeout
 
 import java.time.format.DateTimeFormatter
@@ -41,6 +42,8 @@ class User extends Actor {
           case 5 => guestActor ! AllGuests()
           case 6 => bookingActor ! getUpcomingBookings()
           case 7 => report()
+          case 8 => billActor ! CheckIn()
+          case 9 => billActor ! CheckOut()
           case _ => println("Invalid choice")
         }
 
@@ -51,18 +54,11 @@ class User extends Actor {
       if (choice == 0) {
         println("Exiting...")
         context.system.terminate()
-        // Additional cleanup or termination logic
       }
 
 
     }
-//            guestActor ! AddGuest(GuestClass(None, "Hassan", status = false, "Hassan@mail,com", "1516"))
-      //      guestActor ! updateGuest(GuestClass(Some(12), "Ham", status = false, "Hammam@mail,com", "01255"))
-      //      guestActor ! deleteGuest(12)
 
-//      val futureResponse = (guestActor ? AddGuest(GuestClass(None, "Hassan", status = false, "Hassan@mail,com", "1516")))
-//      val response = Await.result(futureResponse, timeout.duration)
-//      println(response)
   }
 
   private def options(): Int = {
@@ -76,6 +72,8 @@ class User extends Actor {
     println("5. Get All Guests")
     println("6. Get All Upcoming Bookings")
     println("7. Report")
+    println("8. Check In")
+    println("9. Check Out")
     println("0. Exit")
     print("Enter your choice: ")
 
@@ -231,8 +229,6 @@ class User extends Actor {
 
   private def addNewGuest(guestName: String): Int = {
     println("Add new Guest")
-//    print("Enter guest name: ")
-//    val guestName = StdIn.readLine()
     print("Enter guest email: ")
     val guestEmail = StdIn.readLine()
     print("Enter guest phone: ")
@@ -245,7 +241,6 @@ class User extends Actor {
 
   def readLocalDate(): LocalDate = {
     val userInput = StdIn.readLine()
-    // Parse the user input into a LocalDate
     LocalDate.parse(userInput, dateFormat)
   }
 }

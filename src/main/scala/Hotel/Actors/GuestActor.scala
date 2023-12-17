@@ -2,9 +2,9 @@ package Hotel.Actors
 
 import Hotel.CRUDs.GuestCRUD
 import Hotel.CRUDs.GuestCRUD.{addGuest, deleteGuest, findAllGuestsMails, findAllGuestsPhones, getAllGuests, updateGuest}
-import Hotel.Models.Guest.GuestTable
+
 import Hotel.Models.GuestClass
-import Hotel.connection.db
+
 import akka.actor.{Actor, Props}
 
 import scala.concurrent.{Await, Future}

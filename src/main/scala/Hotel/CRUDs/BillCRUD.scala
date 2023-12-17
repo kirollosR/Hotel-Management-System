@@ -56,6 +56,12 @@ object BillCRUD {
       case None => Future.successful(None) // Booking not found
     }
   }
+//def getGuestIdByName(name: String): Future[Option[Option[Int]]] =
+//  db.run(GuestTable.filter(_.name === name).map(_.id).result.headOption)
+//  def getBillAmountByBookingId(bookingId: Int): Future[Option[Double]] = {
+//    db.run(BillTable.filter(_.bookingId === bookingId).map(_.amount).result.headOption)
+//
+//  }
 
   private def calculateReservationDuration(startDate: LocalDate, endDate: LocalDate): Int = {
     // Calculate the difference between two LocalDates in days

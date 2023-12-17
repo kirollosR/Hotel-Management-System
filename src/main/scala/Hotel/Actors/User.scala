@@ -5,17 +5,19 @@ import Hotel.Actors.BookingActor.{Book, _}
 import Hotel.Actors.GuestActor.{AddGuest, AllGuests, DeleteGuest, UpdateGuest}
 import Hotel.Actors.ReportActor.{CountAllBookings, CountAvaialableGuests, CountGuests, CountRooms, CountUpcomingBookings}
 import Hotel.Actors.User.LiveTheLife
-import Hotel.CRUDs.GuestCRUD.{findGuestsByName, getGuestById}
-
+import Hotel.CRUDs.BillCRUD.{addBill, checkEndDate, checkStartDate, getBillAmountByBookingId, getBookingIdByGuestIdAndEndDate, getBookingIdByGuestIdAndStartDate}
+import Hotel.CRUDs.CurrentlyReservedCRUD.cancelReservation
+import Hotel.CRUDs.GuestCRUD
+import Hotel.CRUDs.GuestCRUD.{findGuestsByName, getGuestById, updateGuest}
 import akka.actor.Actor
 import Hotel.Main._
-import Hotel.Models.GuestClass
+import Hotel.Models.{BillClass, GuestClass}
 import akka.util.Timeout
 
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration.{Duration, DurationInt}
 import akka.pattern.ask
 
 import scala.io.StdIn
@@ -31,7 +33,7 @@ class User extends Actor {
   private var validGuestName = false
   val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
   override def receive: Receive = {
-    case LiveTheLife => {
+    case LiveTheLife =>
       var choice = options()
       while (choice != 0) {
         choice match {
@@ -42,8 +44,8 @@ class User extends Actor {
           case 5 => guestActor ! AllGuests()
           case 6 => bookingActor ! getUpcomingBookings()
           case 7 => report()
-          case 8 => billActor ! CheckIn()
-          case 9 => billActor ! CheckOut()
+          case 8 => checkIn()
+          case 9 => checkOut()
           case _ => println("Invalid choice")
         }
 
@@ -55,9 +57,6 @@ class User extends Actor {
         println("Exiting...")
         context.system.terminate()
       }
-
-
-    }
 
   }
 
@@ -243,6 +242,108 @@ class User extends Actor {
 
   def readLocalDate(): LocalDate = {
     val userInput = StdIn.readLine()
+    LocalDate.parse(userInput, dateFormat)
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  private def checkIn() = {
+    print("Enter guest name: ")
+    val guestName = StdIn.readLine()
+    val guests = Await.result(findGuestsByName(guestName), timeout.duration)
+    var guestId = -1
+    if (guests.nonEmpty) {
+      guests.foreach {
+        guest =>
+          val id = guest.id.getOrElse(-1)
+          println(s"Guest ID: ${id} | Name: ${guest.name} | Status: ${guest.status} | Email: ${guest.email} | Phone: ${guest.phone}")
+      }
+      print("Did you find the guest you were looking for? (y/n): ")
+      val foundGuest = StdIn.readLine().toLowerCase == "y"
+      if (foundGuest) {
+        print("Enter guest ID: ")
+        guestId = StdIn.readInt()
+      } else {
+        println("No guests found")
+      }
+    } else {
+      println("No guests found")
+    }
+    val guest = Await.result(getGuestById(guestId), timeout.duration).get
+    val updatedGuest = GuestClass(guest.id, guest.name, true, guest.email, guest.phone)
+    Await.result(GuestCRUD.updateGuest(updatedGuest), timeout.duration)
+    print("Enter Start date: ")
+    val startDate: LocalDate = readLocalDate1()
+    if (Await.result(checkStartDate(guestId, startDate), timeout.duration)) {
+      val bookingId = Await.result(getBookingIdByGuestIdAndStartDate(guestId, startDate), timeout.duration).get.get
+      val billAmount = Await.result(getBillAmountByBookingId(bookingId), timeout.duration).get
+      val bill = BillClass(None, bookingId, billAmount, LocalDate.now(), guestId)
+      val billId = Await.result(addBill(bill), timeout.duration)
+      println("Checked in successfully ... Enjoy your stay")
+    } else {
+      println("You have no reservation on this date")
+    }
+  }
+
+  private def checkOut() = {
+    print("Enter guest name: ")
+    val guestName = StdIn.readLine()
+    val guests = Await.result(findGuestsByName(guestName), timeout.duration)
+    var guestId = -1
+    if (guests.nonEmpty) {
+      guests.foreach {
+        guest =>
+          val id = guest.id.getOrElse(-1)
+          println(s"Guest ID: ${id} | Name: ${guest.name} | Status: ${guest.status} | Email: ${guest.email} | Phone: ${guest.phone}")
+      }
+      print("Did you find the guest you were looking for? (y/n): ")
+      val foundGuest = StdIn.readLine().toLowerCase == "y"
+      if (foundGuest) {
+        print("Enter guest ID: ")
+        guestId = StdIn.readInt()
+      } else {
+        println("No guests found")
+      }
+    } else {
+      println("No guests found")
+    }
+    val guest = Await.result(getGuestById(guestId), timeout.duration).get
+
+    print("Enter End date: ")
+    val endDate: LocalDate = readLocalDate1()
+    if (Await.result(checkEndDate(guestId, endDate), timeout.duration)) {
+      val bookingId = Await.result(getBookingIdByGuestIdAndEndDate(guestId, endDate), timeout.duration).get.get
+      val removeCurrentReservation = Await.result(cancelReservation(bookingId), timeout.duration)
+      val updatedGuest = GuestClass(guest.id, guest.name, false, guest.email, guest.phone)
+      Await.result(GuestCRUD.updateGuest(updatedGuest), timeout.duration)
+      val test = Await.result(getBillAmountByBookingId(bookingId), timeout.duration)
+      println(s"Your Total Bill is: ${test.get}")
+      println("Checked out successfully ... Hope you enjoyed your stay")
+    } else {
+      println("You have no reservation on this date")
+    }
+  }
+
+  def readLocalDate1(): LocalDate = {
+    val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val userInput = StdIn.readLine()
+    // Parse the user input into a LocalDate
     LocalDate.parse(userInput, dateFormat)
   }
 }

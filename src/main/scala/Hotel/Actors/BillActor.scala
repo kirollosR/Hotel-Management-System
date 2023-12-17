@@ -30,15 +30,15 @@ class BillActor extends Actor {
   implicit val timeout: Timeout = Timeout(5.seconds)
   override def receive: Receive = {
     case CheckIn() => {
-      checkIn
+      checkkIn()
     }
 
     case CheckOut() => {
-      checkOut
+      checkkOut()
     }
   }
 
-  def checkIn(): Unit = {
+  def checkkIn(): Unit = {
     print("Enter guest name: ")
     val guestName = StdIn.readLine()
     val guests = Await.result(findGuestsByName(guestName), timeout.duration)
@@ -79,7 +79,7 @@ class BillActor extends Actor {
 
   }
 
-  def checkOut(): Unit = {
+  def checkkOut(): Unit = {
     print("Enter guest name: ")
     val guestName = StdIn.readLine()
     val guests = Await.result(findGuestsByName(guestName), timeout.duration)

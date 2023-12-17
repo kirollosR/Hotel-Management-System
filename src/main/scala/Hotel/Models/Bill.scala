@@ -8,7 +8,8 @@ case class BillClass(
                       id: Int,
                       bookingId: Int,
                       amount: Double,
-                      issuedDate: LocalDate
+                      issuedDate: LocalDate,
+                      guestId: Int
 )
 
 object Bill {
@@ -19,13 +20,14 @@ object Bill {
     def bookingId = column[Int]("booking_id")
     def amount = column[Double]("amount")
     def issuedDate = column[LocalDate]("issued_date")
+    def guestId = column[Int]("guest_id")
 
     // mapping function to transform from tuple to domain object and vice versa
-    override def * = (id, bookingId, amount, issuedDate) <> (BillClass.tupled, BillClass.unapply)
+    override def * = (id, bookingId, amount, issuedDate, guestId) <> (BillClass.tupled, BillClass.unapply)
   }
   lazy val BillTable = TableQuery[BillTable]
 
-  implicit val getBillResult = GetResult(r => BillClass(r.nextInt, r.nextInt, r.nextDouble, r.nextDate.toLocalDate))
+  implicit val getBillResult = GetResult(r => BillClass(r.nextInt, r.nextInt, r.nextDouble, r.nextDate.toLocalDate, r.nextInt))
 
 }
 

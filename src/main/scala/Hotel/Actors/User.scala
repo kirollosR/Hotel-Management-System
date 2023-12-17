@@ -25,16 +25,6 @@ object User {
 class User extends Actor {
   implicit val timeout: Timeout = Timeout(5.seconds)
 
-  //  override def receive: Receive = {
-  //    case LiveTheLife => {
-  //      val guestName = "sayed"
-  //      val GuestId = Await.result(getGuestIdByName(guestName), timeout.duration).get.get
-  //      println(GuestId)
-  //      bookingActor ! Book(2, LocalDate.of(2023, 11, 20), LocalDate.of(2023, 11, 25), GuestId)
-  ////      bookingActor ! Book(2, LocalDate.of(2023, 11, 28), LocalDate.of(2023, 11, 30), GuestId)
-  //      bookingActor ! Cancel(3)
-  //    }
-  //  }
   var validGuestName = false
   val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
   override def receive: Receive = {
@@ -57,6 +47,7 @@ class User extends Actor {
 
       if (choice == 0) {
         println("Exiting...")
+        context.system.terminate()
         // Additional cleanup or termination logic
       }
 

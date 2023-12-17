@@ -28,7 +28,7 @@ object User {
 class User extends Actor {
   implicit val timeout: Timeout = Timeout(5.seconds)
 
-  var validGuestName = false
+  private var validGuestName = false
   val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
   override def receive: Receive = {
     case LiveTheLife => {
@@ -185,6 +185,7 @@ class User extends Actor {
       if (guestName.toLowerCase == "exit") {
         println("Exiting...")
         context.system.terminate()
+        return
       } else {
         if (guestName.nonEmpty) {
           val guests = Await.result(findGuestsByName(guestName), timeout.duration)
@@ -214,6 +215,7 @@ class User extends Actor {
         }
       }
     }
+    validGuestName = false
   }
 
   private def createBooking(guestId: Int): Unit = {

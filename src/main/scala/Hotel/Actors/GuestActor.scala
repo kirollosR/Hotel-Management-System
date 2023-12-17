@@ -1,7 +1,7 @@
 package Hotel.Actors
 
 import Hotel.CRUDs.GuestCRUD
-import Hotel.CRUDs.GuestCRUD.{addGuest, deleteGuest, findAllGuestsMails, findAllGuestsPhones, updateGuest}
+import Hotel.CRUDs.GuestCRUD.{addGuest, deleteGuest, findAllGuestsMails, findAllGuestsPhones, getAllGuests, updateGuest}
 import Hotel.Models.Guest.GuestTable
 import Hotel.Models.GuestClass
 import Hotel.connection.db
@@ -15,7 +15,7 @@ object GuestActor {
   case class Guest(id: Int, name: String, status: Boolean, email: String, phone: String)
   // Messages for CRUD operations
   case class AddGuest(guest: GuestClass)
-  case class GetGuestById(id: Int)
+  case class AllGuests()
   case class UpdateGuest(guest: GuestClass)
   case class DeleteGuest(id: Int)
 
@@ -53,6 +53,14 @@ class GuestActor extends Actor {
         sender() ! result
         println(s"Guest with ID $id deleted successfully")
       }
+
+    case AllGuests() =>
+      val result = Await.result(getAllGuests(), 2.seconds)
+      result.foreach {
+        case (guest) =>
+          println(s"Guest ID: ${guest.id.getOrElse("N/A")}, Name: ${guest.name}, Status: ${guest.status}, Email: ${guest.email}, Phone: ${guest.phone}")
+      }
+//      println(s"Guests: $result")
   }
 
 

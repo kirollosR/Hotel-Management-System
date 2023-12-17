@@ -24,7 +24,7 @@ object GuestCRUD {
   def getGuestById(guestId: Int): Future[Option[GuestClass]] =
     db.run(GuestTable.filter(_.id === guestId).result.headOption)
 
-  def getAllGuests: Future[Seq[GuestClass]] =
+  def getAllGuests(): Future[Seq[GuestClass]] =
     db.run(GuestTable.result)
 
   def updateGuest(guest: GuestClass): Future[Int] =

@@ -1,9 +1,9 @@
 package Hotel.Actors
 
 import Hotel.Actors.BookingActor.{Book, _}
-import Hotel.Actors.GuestActor.AddGuest
+import Hotel.Actors.GuestActor.{AddGuest, AllGuests, DeleteGuest, UpdateGuest}
 import Hotel.Actors.User.LiveTheLife
-import Hotel.CRUDs.GuestCRUD.{addGuest, findGuestsByName, getAllGuests, getGuestIdByName}
+import Hotel.CRUDs.GuestCRUD.{addGuest, findGuestsByName, getAllGuests, getGuestById, getGuestIdByName}
 import akka.actor.Actor
 import Hotel.Main._
 import Hotel.Models.{CurrentlyReservedClass, GuestClass}
@@ -44,11 +44,10 @@ class User extends Actor {
         choice match {
           case 1 => Booking()
           case 2 => cancelBooking()
-          case 3 => println("Add Guest")
-          case 4 => println("Update Guest")
-          case 5 => println("Delete Guest")
-          case 6 => println("Get All Guests")
-          case 7 => println("Get All Upcoming Bookings")
+          case 3 => updateGuest()
+          case 4 => deleteGuest()
+          case 5 => guestActor ! AllGuests()
+          case 6 => bookingActor ! getUpcomingBookings()
           case _ => println("Invalid choice")
         }
 
@@ -77,11 +76,10 @@ class User extends Actor {
     println("Please select an option:")
     println("1. Booking")
     println("2. Cancel Booking")
-    println("3. Add Guest")
-    println("4. Update Guest")
-    println("5. Delete Guest")
-    println("6. Get All Guests")
-    println("7. Get All Upcoming Bookings")
+    println("3. Update Guest")
+    println("4. Delete Guest")
+    println("5. Get All Guests")
+    println("6. Get All Upcoming Bookings")
     println("0. Exit")
     print("Enter your choice: ")
 
@@ -89,8 +87,69 @@ class User extends Actor {
     choice
   }
 
-  private def updateGuest(): Unit = {
+  private def allGuests(): Unit = {
+    guestActor ! AllGuests()
 
+  }
+
+  private def deleteGuest(): Unit = {
+    print("Enter guest name: ")
+    val guestName = StdIn.readLine()
+    val guests = Await.result(findGuestsByName(guestName), timeout.duration)
+    if (guests.nonEmpty) {
+      guests.foreach {
+        guest =>
+          val id = guest.id.getOrElse(-1)
+          println(s"Guest ID: ${id} | Name: ${guest.name} | Status: ${guest.status} | Email: ${guest.email} | Phone: ${guest.phone}")
+      }
+      print("Did you find the guest you were looking for? (y/n): ")
+      val foundGuest = StdIn.readLine().toLowerCase == "y"
+      if (foundGuest) {
+        print("Enter guest ID: ")
+        val guestId = StdIn.readInt()
+        guestActor ! DeleteGuest(guestId)
+      }
+      validGuestName = true // Exit the loop when a valid name is entered
+    } else {
+      println("No guests found")
+    }
+  }
+
+  private def updateGuest(): Unit = {
+    print("Enter guest name: ")
+    val guestName = StdIn.readLine()
+    val guests = Await.result(findGuestsByName(guestName), timeout.duration)
+    if (guests.nonEmpty) {
+      guests.foreach {
+        guest =>
+          val id = guest.id.getOrElse(-1)
+          println(s"Guest ID: ${id} | Name: ${guest.name} | Status: ${guest.status} | Email: ${guest.email} | Phone: ${guest.phone}")
+      }
+      print("Did you find the guest you were looking for? (y/n): ")
+      val foundGuest = StdIn.readLine().toLowerCase == "y"
+      if (foundGuest) {
+        print("Enter guest ID: ")
+        val guestId = StdIn.readInt()
+        val guest = Await.result(getGuestById(guestId), timeout.duration)
+        guest match {
+          case Some(guest) =>
+            println(s"Guest ID: ${guest.id.asInstanceOf[Int]} | Name: ${guest.name} | Status: ${guest.status} | Email: ${guest.email} | Phone: ${guest.phone}")
+            print("Enter new name: ")
+            val newName = StdIn.readLine()
+            print("Enter new email: ")
+            val newEmail = StdIn.readLine()
+            print("Enter new phone: ")
+            val newPhone = StdIn.readLine()
+
+            guestActor ! UpdateGuest(GuestClass(Some(guestId), newName, guest.status, newEmail, newPhone))
+          case None =>
+            println("No guest found.")
+        }
+      }
+      validGuestName = true // Exit the loop when a valid name is entered
+    } else {
+      println("No guests found")
+    }
   }
 
   private def cancelBooking(): Unit = {
@@ -108,8 +167,6 @@ class User extends Actor {
         println("Exiting...")
         context.system.terminate()
       } else {
-        val allGuests = Await.result(getAllGuests, timeout.duration)
-
         if (guestName.nonEmpty) {
           val guests = Await.result(findGuestsByName(guestName), timeout.duration)
           if (guests.nonEmpty) {
@@ -118,7 +175,6 @@ class User extends Actor {
                 val id = guest.id.getOrElse(-1)
                 println(s"Guest ID: ${id} | Name: ${guest.name} | Status: ${guest.status} | Phone: ${guest.phone}")
             }
-
             print("Did you find the guest you were looking for? (y/n): ")
             val foundGuest = StdIn.readLine().toLowerCase == "y"
             if (foundGuest) {
